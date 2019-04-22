@@ -18,8 +18,15 @@ router.get('/ping', async (req, res, next) => {
 
 router.get('/static-data', async (req, res, next) => {
   try {
-    const kaynChamps = await kayn.DDragon.Champion.list()
+    const kaynPromises = [
+      kayn.DDragon.Champion.list(),
+      kayn.DDragon.Item.list(),
+      kayn.DDragon.SummonerSpell.list()
+    ]
+    const [kaynChamps, kaynItems, kaynSpells] = await Promise.all(kaynPromises)
     const kaynChampsData = kaynChamps.data
+    const kaynItemsData = kaynItems.data
+    const kaynSpellsData = kaynSpells.data
     const champs = Object.keys(kaynChampsData).map((key) => {
       return {
         key: kaynChampsData[key].id,
@@ -28,11 +35,30 @@ router.get('/static-data', async (req, res, next) => {
         image: kaynChampsData[key].image
       }
     })
+    const items = Object.keys(kaynItemsData).map((key) => {
+      return {
+        riot: key,
+        name: kaynItemsData[key].name,
+        image: kaynItemsData[key].image
+      }
+    })
+    const spells = Object.keys(kaynSpellsData).map((key) => {
+      return {
+        key: kaynSpellsData[key].id,
+        riot: kaynSpellsData[key].key,
+        name: kaynSpellsData[key].name,
+        image: kaynSpellsData[key].image
+      }
+    })
+
     res.json({
       roles: Constants.roles,
       regions: Constants.regions,
       queues: Constants.queues,
       champs,
+      items,
+      spells,
+      runes: Constants.runes,
       created: getTs()
     })
   } catch (err) {
@@ -44,8 +70,8 @@ router.get('/summoner/:region/:name/match-history', async (req, res, next) => {
   try {
     if (!req.params.name) throw createError(400, 'Summoner name is required')
 
-    let startIndex = null
-    let endIndex = null
+    let startIndex = 0
+    let endIndex = 20
     const queryStartIndex = req.query.startIndex
     const queryEndIndex = req.query.endIndex
     const queryRole = req.query.role

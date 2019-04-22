@@ -98,8 +98,42 @@ const queues = [
   }
 ]
 
+const runes = [
+  {
+    riot: 8100,
+    key: 'Domination',
+    icon: 'perk-images/Styles/7200_Domination.png',
+    name: 'Domination'
+  },
+  {
+    riot: 8300,
+    key: 'Inspiration',
+    icon: 'perk-images/Styles/7203_Whimsy.png',
+    name: 'Inspiration'
+  },
+  {
+    riot: 8000,
+    key: 'Precision',
+    icon: 'perk-images/Styles/7201_Precision.png',
+    name: 'Precision'
+  },
+  {
+    riot: 8400,
+    key: 'Resolve',
+    icon: 'perk-images/Styles/7204_Resolve.png',
+    name: 'Resolve'
+  },
+  {
+    riot: 8200,
+    key: 'Sorcery',
+    icon: 'perk-images/Styles/7202_Sorcery.png',
+    name: 'Sorcery'
+  }
+]
+
 module.exports = {
   roles: addIds(roles),
   regions: addIds(regions),
-  queues: addIds(queues)
+  queues: addIds(queues),
+  runes: addIds(runes)
 }

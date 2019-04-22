@@ -35,6 +35,25 @@ const createQuery = async (req, startIndex, endIndex) => {
   return query
 }
 
+const getRole = (match) => {
+  let lookupKey = match.lane
+  if (lookupKey === 'BOTTOM') {
+    lookupKey = match.role
+  }
+  const foundRole = Constants.roles.find((x) => x.riot === lookupKey)
+  return foundRole ? foundRole.name : null
+}
+
+const calculateKDA = (kills, deaths, assists) => {
+  if (kills > 0 && assists > 0 && deaths < 1) {
+    return 'Perfect'
+  }
+  if (kills < 1 && assists < 1 && deaths < 1) {
+    return 0.0
+  }
+  return ((kills + assists) / deaths).toFixed(2)
+}
+
 const massageMatchData = async (match) => {
   const champId = match.champion
   const matchData = await kayn.MatchV4.get(match.gameId)
@@ -42,6 +61,7 @@ const massageMatchData = async (match) => {
   const stats = champGameData.stats
   const cs = stats.totalMinionsKilled + stats.neutralMinionsKilled
   const gameDurationMin = matchData.gameDuration / 60
+  const role = getRole(match)
 
   return {
     champion: {
@@ -49,7 +69,7 @@ const massageMatchData = async (match) => {
       level: stats.champLevel
     },
     gameCreation: matchData.gameCreation,
-    creepScore: stats.totalMinionsKilled,
+    creepScore: cs,
     creepScorePm: (cs / gameDurationMin).toFixed(1),
     gameDuration: matchData.gameDuration,
     items: [
@@ -65,16 +85,17 @@ const massageMatchData = async (match) => {
       kills: stats.kills,
       deaths: stats.deaths,
       assists: stats.assists,
-      ratio: ((stats.kills + stats.assists) / stats.deaths).toFixed(2)
+      ratio: calculateKDA(stats.kills, stats.deaths, stats.assists)
     },
     matchId: match.gameId,
     perks: {
       perkPrimaryStyle: stats.perkPrimaryStyle,
       perkSubStyle: stats.perkSubStyle
     },
+    role,
     queueType: matchData.queueId,
     spells: [champGameData.spell1Id, champGameData.spell2Id],
-    win: stats.win
+    outcome: stats.win ? 'Victory' : 'Defeat'
   }
 }
 

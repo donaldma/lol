@@ -1,5 +1,5 @@
 const moment = require('moment')
-const { Kayn, REGIONS } = require('kayn')
+const { Kayn, BasicJSCache } = require('kayn')
 
 const handleServerError = (res, err) => {
   const { status, message } = err
@@ -22,7 +22,16 @@ const addIds = (arr) => {
 
 const getTs = () => moment().format('X')
 
-const kayn = Kayn(process.env.RIOT_KEY)()
+const basicCache = new BasicJSCache()
+
+const kayn = Kayn(process.env.RIOT_KEY)({
+  cacheOptions: {
+    cache: basicCache,
+    timeToLives: {
+      useDefault: true
+    }
+  }
+})
 
 module.exports = {
   handleServerError,
